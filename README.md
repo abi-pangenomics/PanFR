@@ -4,7 +4,7 @@
     run ./app/client/index.html in your web browser
 
 ## Running the serverlet  
-    java -jar ./app/serverlet/serverlet.jar
+    java -jar ./app/serverlet/serverlet.jar <frs file> <frpaths file>
     
     [note - current version runs the server on localhost:9997]
 
