@@ -1,0 +1,29 @@
+/** force stuff **/
+
+.node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+
+.link {
+    stroke: #999;
+    stroke-opacity: .6;
+}
+
+.label {
+    pointer-events: none;
+    font: 9px helvetica;
+}
+
+.graph-canvas {
+    width: 87%;
+    float: right;
+    padding: 1px;
+
+}
+
+.node:hover{
+    fill: #000;
+}
+

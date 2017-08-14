@@ -1,0 +1,5 @@
+<root>
+  <item name='javax.ws.rs.core.MediaType APPLICATION_JSON_TYPE'>
+    <annotation name='org.jetbrains.annotations.NotNull'/>
+  </item>
+</root>

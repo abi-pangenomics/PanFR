@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- StyleSheets -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/force.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/split.css">
+
+
+    <!--javascript libraries-->
+    <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+    <!--boostrap stuff-->
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+<!-- Side Menu - Analysis Options -->
+<div class="nav-side-menu">
+    <div class="brand">Analysis Options</div>
+    <i class="fa fa-bars fa-2x toggle-btn" data-toggle="collapse" data-target="#menu-content"></i>
+    <div class="menu-list">
+        <ul id="menu-content" class="menu-content collapse out">
+            <li data-toggle="collapse" data-target="#products" class="collapsed">
+                <a href="#" id="init-graph-button"><i class="fa fa-gift fa-lg"></i> Initialize Graph <span class="arrow"></span></a>
+            </li>
+            <li data-toggle="collapse" id="restore-default" class="collapsed">
+                <a href="#"> Restore Default <span class="arrow"></span></a>
+            </li>
+            <li data-toggle="collapse" id="add-node" class="collapsed">
+                <a href="#"> Add Annotation <span class="arrow"></span></a>
+            </li>
+            <li data-toggle="collapse" id="view-hierarchies" class="collapsed">
+                <a href="#"> Hierarchies <span class="arrow"></span></a>
+            </li>
+            <!--<li data-toggle="collapse" id="get-node-paths" class="collapsed">
+                <a href="#"> Get All Paths <span class="arrow"></span></a>
+            </li>-->
+            <li data-toggle="collapse" data-target="#edge-thresh" id="splice-edges" class="collapsed">
+                <a href="#"> Splice Links <span class="arrow"></span></a>
+            </li>
+            <ul class="sub-menu collapse" id="edge-thresh">
+                <input type="range" id="thresholdSlider" name="points" value = 0 min="0" max="10" onchange="threshold(this.value)" style="padding: 2px"> </input>
+            </ul>
+            <li data-toggle="collapse" data-target="#path-names" class="collapsed">
+                <a href="#"> FR-Paths <span class="arrow"></span></a>
+            </li>
+            <ul class="sub-menu collapse" id="path-names"></ul>
+        </ul>
+    </div>
+</div>
+
+<!-- Display - Canvas + Console -->
+<div id="display-wrapper" class="split split-horizontal">
+    <!-- Canvas - Where the actual graph is drawn -->
+    <div id="canvas" class="split content"></div>
+    <!-- Console - Both the left and right console -->
+    <div id="console" class="split content split-horizontal">
+        <div id="a" class="split split-horizontal">
+            <div id="left-console" class="split content">
+                <div id="left-console-header"><b id="left-console-header-text">Hierarchies</b></div>
+                <div id="left-console-display">
+
+                </div>
+            </div>
+        </div>
+
+        <div id="b" class="split split-horizontal">
+            <div id="right-console" class="split content">
+                <div id="console-header">
+                    <b id="console-header-text">Console</b>
+                </div>
+                <p id="console-display"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<!-- javascript libraries -->
+<!-- d3 -->
+<script src='http://d3js.org/d3.v3.min.js'></script>
+<!-- split.js -->
+<script src="https://unpkg.com/split.js/split.min.js"></script>
+<!-- local files -->
+<script src="js/splitdisplay.js"></script>
+<script src="js/main.js"></script>
+<script src="js/force.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/display.js"></script>
+<!--<script src="js/servercommunications.js"></script>-->
+<script src="js/eventhandlers.js"></script>
+<script src="js/applicationinitialization.js"></script>
+</html>
