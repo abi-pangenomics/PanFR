@@ -6,7 +6,7 @@
 ## Running the serverlet  
     java -jar ./app/serverlet/serverlet.jar
     
-    [note - current version runs the server on localhost:9998]
+    [note - current version runs the server on localhost:9997]
 
 ## Serverlet Dependencies  
      org.glassfish.jersey.containers:jersey-container-jetty-http:2.26-b032  
