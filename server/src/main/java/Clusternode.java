@@ -8,18 +8,18 @@ import java.util.HashSet;
  * Created by shubhangkulkarni on 6/28/17.
  */
 public class Clusternode implements Comparable{
-    public Clusternode parent;
+    public Clusternode parent;                              // reference to parent in the hierarachy
+    public Clusternode group;                               // group number
+    public ArrayList<Integer> members;                      // node numbers of group members
+    public ArrayList<Clusternode> children;                 // List of all immediate children
+    public HashSet<Integer> paths;                          // list of all paths going through the node
+    HashMap<Integer, ArrayList<Integer>> pathspositions;    // all the paths the node occurs in - all the positions in the path
 
-    public int node;
-    public int numMembers;
-    public Clusternode group;
-    public ArrayList<Integer> members;
-    public boolean isleaf;
-    public boolean isifr;
-    public ArrayList<Clusternode> children;
-    public HashSet<Integer> paths;
-    HashMap<Integer, ArrayList<Integer>> pathspositions; // all the paths the node occurs in - all the positions in the path
-    public int hierarchy_number;
+    public boolean isleaf;          // true if leaf in hieararchy
+    public boolean isifr;           // true if fr, false if dbg node
+    public int hierarchy_number;    // hierarchy number
+    public int node;                // node (fr) number
+    public int numMembers;          // number of group members
 
     public Clusternode(int node, Clusternode parent, Clusternode group, boolean isifr, boolean isleaf, int numMembers) {
         this.parent = parent;
@@ -53,9 +53,7 @@ public class Clusternode implements Comparable{
         pathspositions.get(path).add(i);
     }
 
-    /**
-     * @deprecated
-     * */
+    /** @deprecated */
     public void _addPath(Integer path){
         if (paths == null)
             paths = new HashSet<>();

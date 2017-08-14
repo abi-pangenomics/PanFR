@@ -6,10 +6,10 @@ import java.util.ArrayList;
  * Created by shubhangkulkarni on 7/17/17.
  */
 public class UpdateEdge {
-    Clusternode u;
-    Clusternode v;
-    ArrayList<Integer> paths;
-    int score;
+    Clusternode u;              // source node reference
+    Clusternode v;              // target node reference
+    ArrayList<Integer> paths;   // list of all paths through the edge
+    int score;                  // edge score
 
     public UpdateEdge(Clusternode u, Clusternode v) {
         this.u = u;

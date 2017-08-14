@@ -16,23 +16,26 @@ import java.util.*;
 public class Vizualization {
 
     // temporary data structures
-    public static HashMap<Integer, TreeSet<Integer>> leafiFRs;
-    public static DisjointSet ds;
+    public static HashMap<Integer, TreeSet<Integer>> leafiFRs;  // leaf - ifr mapping (used only in union-find hierarchy construction)
+    public static DisjointSet ds;                               // union find data structure. used for clustering the hierarchy groups based on number of leaves and overlap of leaf-set
 
     // permanent data structures
-    public static HashMap<Integer, TreeSet<Clusternode>> hierarchies; // could very well be an Arraylist. Has all the hierarchies
-    public static HashMap<Integer, Clusternode> nodecluster; // mapping form a node's id to corresponding clusternode
-    public static HashMap<Integer, Clusternode> ifrcluster; // mapping from an ifr's id to corresponding clusternode
-    public static ArrayList<Clusternode> rootIfrs; // All the root ifr clusternodes
-    public static VizGraph pathgraph;   // reference graph. Same for every user, changes according to dataset
-    public static VizGraph displaygraph;    // different for every user. saves the user's state
-    public static HashMap<Integer, Integer[]> pathid_pathnodes; // mapping of path id to path nodes
-    public static String[] pathnames; // Mapping of path id too pathname.index of a pathname is its path id
+    public static HashMap<Integer, TreeSet<Clusternode>> hierarchies;   // could very well be an Arraylist. Has all the hierarchies
+    public static HashMap<Integer, Clusternode> nodecluster;            // mapping form a node's id to corresponding clusternode
+    public static HashMap<Integer, Clusternode> ifrcluster;             // mapping from an ifr's id to corresponding clusternode
+    public static ArrayList<Clusternode> rootIfrs;                      // All the root ifr clusternodes
+    public static VizGraph pathgraph;                                   // reference graph. Same for every user, changes according to dataset
+    public static VizGraph displaygraph;                                // different for every user. saves the user's state
+    public static HashMap<Integer, Integer[]> pathid_pathnodes;         // mapping of path id to path nodes
+    public static String[] pathnames;                                   // Mapping of path id too pathname.index of a pathname is its path id
 
-    public static final boolean verbose = true; // command line view option
-    public static final boolean debug = true;   // command line debug option
+    public static final boolean verbose = true;     // command line view option
+    public static final boolean debug = true;       // command line debug option
     public static final boolean dbnodesviz = false; // option to add the de bruijn graph nodes to visualization. default should be false
-    public static int numFrs = 0;   // counts number of FRs
+    public static int numFrs = 0;                   // counts number of FRs
+
+
+    // ---------- Request Handlers ---------
 
     public static String getHierarchiesText(){
         StringBuilder hierarchytext = new StringBuilder("");
@@ -109,6 +112,71 @@ public class Vizualization {
         return frspath.toString().substring(0, frspath.length()-1);
     }
 
+
+
+    // ----- Dynamic Update Handlers ---------
+
+    public static void clicked(Integer index){
+        if (!ifrcluster.containsKey(index)) {
+            System.out.println("Error : node #" + index + "cannot be clicked");
+            return;
+        }
+        System.out.println("[ debug : Node #"+ index + " clicked ]");
+
+        Clusternode root = ifrcluster.get(index);
+        assert (root != null);
+
+        //set root group to null if you want to remove it from the new graph
+        root.group = root;
+
+        if (isLeaf(root)){
+            root.group = root;
+            System.out.println("Leaf cannot be clicked...");
+            return;
+        }
+
+        for (Clusternode c : root.children)
+            setHierarchyGroup(c, c);
+
+        updateDisplayGraph(root);
+        //updateDisplayGraph();
+    }
+
+    public static void setHierarchyGroup(Clusternode root, Clusternode group){
+        root.group = group;
+        if (isLeaf(root))
+            return;
+        for (Clusternode c : root.children)
+            setHierarchyGroup(c, group);
+    }
+
+    public static void updateDisplayGraph(Clusternode c){
+        // remove vertex
+        displaygraph.removeVertex(c);
+        // get original graph
+        HashMap<Clusternode, HashSet<Clusternode>> adjList = pathgraph.getAdjList();
+        ArrayList<UpdateEdge> updates = new ArrayList<>();
+
+        for (Clusternode u : adjList.keySet()){
+            for (Clusternode v : adjList.get(u)){
+                if (!displaygraph.hasEdge(u.group, v.group)) {
+                    updates.add(new UpdateEdge(u.group, v.group));
+                    displaygraph.addEdge(u.group, v.group);
+                }
+            }
+        }
+        displaygraph.updateEdgePaths();
+        displaygraph.setUpdates(updates);
+    }
+
+
+
+    // ------ Hierarchy Construction ---------
+
+    /**
+     * iterates through all the root nodes and recursively attaches all the nodes
+     * to the hierarchy as per the overlap of the cDBG leaves
+     * */
     public static void constructHierarchies() {
         rootIfrs = new ArrayList<>();
         for (Integer group : hierarchies.keySet()){
@@ -118,7 +186,7 @@ public class Vizualization {
             root.group = root;
             Clusternode c;
             while((c = ifrs.pollLast()) != null){
-                // all the nodes in the same hierarchy have the same hierarchy number - possible coloring ??
+                // all the nodes in the same hierarchy have the same hierarchy number - possible coloring
                 c.hierarchy_number = root.node;
 
                 c.group = root;
@@ -139,6 +207,14 @@ public class Vizualization {
         //hierarchies = null;
     }
 
+    /**
+     * @param root - root of the hierarchy/sub-hierarchy on which clusternode is being attached
+     * @param clusternode - node to attach to current hierarchy
+     *
+     * checks whether the leaves of clusternode overlap with any leaves of children of root
+     * case 1) if overlap - attach to the corresponding child
+     * case 2) attach as new child of root
+     * */
     public static void attach(Clusternode root, Clusternode clusternode){
         if (root.children == null)
             root.children = new ArrayList<>();
@@ -155,7 +231,15 @@ public class Vizualization {
         root.children.add(clusternode);
     }
 
-   public static boolean isOverlap(Clusternode c1, Clusternode c2){
+    /**
+     * @param c1 - clusternode 1 [already part of a hierarchy]
+     * @param c2 - clusternode 2 [clusternode to attach to hierarchy]
+     *
+     * @return true if there is overlap of cDBG leaves, false otherwise
+     *
+     * @TODO - optimize further. Currently validates the data by making sure that there is full overlap. partial overlap detection sufficient if good data
+     * */
+    public static boolean isOverlap(Clusternode c1, Clusternode c2){
        if(c1 == null || c2 == null)
            return false;
 
@@ -171,32 +255,37 @@ public class Vizualization {
        }
        assert (larger.equals(c1)); // debug
 
-       if (!larger.members.containsAll(smaller.members)){
+       /*if (!larger.members.containsAll(smaller.members)){
            for (int i = 0; i < smaller.members.size(); i++){
                if (!larger.members.contains(smaller.members.get(i)))
-                   System.out.println("Well damn :| ..." +
+                   System.out.println("I should not be here :( ..." +
                            "\nNODE --> " + smaller.members.get(i).intValue() + " <--");
            }
-       }
+       }*/
        return larger.members.containsAll(smaller.members);
    }
 
+    /**
+     * Initializes the union-find data structure with number of groups = number of iFRs
+     * iterates through all the leaves, and unions all the corresponding iFRs into the same set
+     * */
     public static void initDS() {
         ds = new DisjointSet(numFrs);
 
         for (Integer i : leafiFRs.keySet()){
             int temp_root = leafiFRs.get(i).first();
             for (Integer j : leafiFRs.get(i))
-                ds.union(temp_root,j);
+                ds.union(temp_root,j);                  // O(max(L, V(V-1)/2 -1)) -> O(max (L,V^2))
         }
         leafiFRs.clear();
         leafiFRs = null;
     }
 
-
     /**
-     * @TODO - Get cleared
-     * Potential errors - if an ifr is a leaf node [although I believe that's unlikely]
+     * @param frsfile - .frs file path from the database
+     *
+     * reads in the iFRs and the corresponding leaf cDBG nodes from the frs file
+     * creates the appropriate mappings of leaf-ifrs and ifrs-clusternodes
      * */
     public static void readFrs(String frsfile) {
         try {
@@ -246,31 +335,11 @@ public class Vizualization {
         }
     }
 
-
-    public static void printhierarchies(){
-        for (Clusternode root : rootIfrs){
-            System.out.println("------");
-            printhierarchies(root);
-        }
-    }
-
-    private static void printhierarchies(Clusternode root){
-        System.out.print(root.node + " : ");
-        if (root.children == null){
-            System.out.print("-1");
-            System.out.println();
-            return;
-        }
-        for (Clusternode c : root.children){
-            System.out.print(c.node + ", ");
-        }
-        System.out.println();
-        for (Clusternode c : root.children){
-            printhierarchies(c);
-        }
-    }
-
-
+    /**
+     * Driver function to initialize the visualization
+     * Initializes the pathgraph and vizgraph
+     * calls the readfrpaths function to add edges
+     * */
     public static void buildVizualization(String frpathsfile) {
         pathgraph = new VizGraph();
         displaygraph = new VizGraph();
@@ -281,6 +350,15 @@ public class Vizualization {
         System.out.println("Done...");
     }
 
+    /**
+     * @param graph - one of pathgraph or vizgraph to which the edge is to be added
+     * @param u - source node for edge
+     * @param v - target node for edge
+     * @param path_index - index of path to which the edge is to be mapped
+     *
+     * adds an edge to the passed in graph
+     * makes sure that the edge is mapped to corresponding path
+     * */
     private static void addEdgePath(VizGraph graph, Clusternode u, Clusternode v, int path_index){
         graph.addEdgePaths(u, v , path_index);
     }
@@ -395,73 +473,55 @@ public class Vizualization {
         }
     }
 
+    /**
+     * @param clusternode - clusternode to check whether if leaf
+     *
+     * @return true if the passed node has no children, false otherwise
+     * */
     public static boolean isLeaf(Clusternode clusternode){
         return (clusternode.children == null || clusternode.children.size() == 0);
     }
 
-    public static void clicked(Integer index){
-        if (!ifrcluster.containsKey(index)) {
-            System.out.println("Error : node #" + index + "cannot be clicked");
+    /**
+     * Proxy function for recursively printing out the hierarchies
+     * */
+    public static void printhierarchies(){
+        for (Clusternode root : rootIfrs){
+            System.out.println("------");
+            printhierarchies(root);
+        }
+    }
+
+    /**
+     * @param root - root of the (sub) hierarchy to be printed out
+     *
+     * Recursive Function to print out hierarchies
+     * prints all the children of the root, and then prints the hierarchies
+     * of the children in a depth first search manner
+     * */
+    private static void printhierarchies(Clusternode root){
+        System.out.print(root.node + " : ");
+        if (root.children == null){
+            System.out.print("-1");
+            System.out.println();
             return;
         }
-        System.out.println("[ debug : Node #"+ index + " clicked ]");
-
-        Clusternode root = ifrcluster.get(index);
-        assert (root != null);
-
-        //set root group to null if you want to remove it from the new graph
-        root.group = root;
-
-        if (isLeaf(root)){
-            root.group = root;
-            System.out.println("Leaf cannot be clicked...");
-            return;
+        for (Clusternode c : root.children){
+            System.out.print(c.node + ", ");
         }
-
-        for (Clusternode c : root.children)
-            setHierarchyGroup(c, c);
-
-        updateDisplayGraph(root);
-        //updateDisplayGraph();
-    }
-
-    public static void setHierarchyGroup(Clusternode root, Clusternode group){
-        root.group = group;
-        if (isLeaf(root))
-            return;
-        for (Clusternode c : root.children)
-            setHierarchyGroup(c, group);
-    }
-
-    public static void updateDisplayGraph(Clusternode c){
-        // remove vertex
-        displaygraph.removeVertex(c);
-        // get original graph
-        HashMap<Clusternode, HashSet<Clusternode>> adjList = pathgraph.getAdjList();
-        ArrayList<UpdateEdge> updates = new ArrayList<>();
-
-        for (Clusternode u : adjList.keySet()){
-            for (Clusternode v : adjList.get(u)){
-                if (!displaygraph.hasEdge(u.group, v.group)) {
-                    updates.add(new UpdateEdge(u.group, v.group));
-                    displaygraph.addEdge(u.group, v.group);
-                }
-            }
-        }
-        displaygraph.updateEdgePaths();
-        displaygraph.setUpdates(updates);
-    }
-
-    public static void updateDisplayGraph() {
-        HashMap<Clusternode, HashSet<Clusternode>> adjList = pathgraph.getAdjList();
-        displaygraph.eraseAll();
-        for (Clusternode u : adjList.keySet()){
-            for (Clusternode v : adjList.get(u)){
-                displaygraph.addEdge(u.group, v.group);
-            }
+        System.out.println();
+        for (Clusternode c : root.children){
+            printhierarchies(c);
         }
     }
 
+    /**
+     * @param frsfile - .frs file from data base
+     * @param frpathsfile - .frpaths file from database
+     *
+     * Used for initializing graph during server-client visualization
+     * Driver function - acts like a main function for server
+     * */
     public static void start(String frsfile, String frpathsfile){
         if (verbose)
             System.out.println("Reading frs file : " + frsfile);
@@ -473,7 +533,7 @@ public class Vizualization {
         hierarchies = ds.getClusters();
         ds = null;
 
-        constructHierarchies();
+        constructHierarchies(); // O(F) worst case - actually O(num hierarchies)
 
         if (debug)
             printhierarchies();
@@ -482,6 +542,20 @@ public class Vizualization {
         displaygraph.display();
     }
 
+    /** @deprecated */
+    public static void updateDisplayGraph() {
+        HashMap<Clusternode, HashSet<Clusternode>> adjList = pathgraph.getAdjList();
+        displaygraph.eraseAll();
+        for (Clusternode u : adjList.keySet()){
+            for (Clusternode v : adjList.get(u)){
+                displaygraph.addEdge(u.group, v.group);
+            }
+        }
+    }
+
+    /**
+     * Use only for Command Line Visualization
+     * */
     public static void main(String[] args) {
         if(args.length != 2){
             System.out.println("Error Usage : <frs file> <frpaths file>");
@@ -544,4 +618,5 @@ public class Vizualization {
             }
         }
     }
+
 }

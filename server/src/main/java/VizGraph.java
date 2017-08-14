@@ -8,12 +8,12 @@ import java.util.TreeSet;
  * Created by shubhangkulkarni on 7/5/17.
  */
 public class VizGraph {
-    private HashMap<Clusternode, HashSet<Clusternode>> adjList;
-    private boolean allow_self_edges = false;
-    private HashMap<Clusternode, HashSet<Clusternode>> revadjList;
-    private HashMap<Clusternode, HashMap<Clusternode, Integer>> edgeScores;
-    private UpdateEdge[] updates;
-    private HashMap<Integer, HashMap<Integer, TreeSet<Integer>>> edgepaths;
+    private HashMap<Clusternode, HashSet<Clusternode>> adjList;             // Main Adjacency list
+    private boolean allow_self_edges = false;                               // Option to allow self edges
+    private HashMap<Clusternode, HashSet<Clusternode>> revadjList;          // Reverse Adjacency list keeping track of all edges pointing to a node @TODO - use in dynamic updates
+    private HashMap<Clusternode, HashMap<Clusternode, Integer>> edgeScores; // edge to score mapping
+    private UpdateEdge[] updates;                                           // Updates on click request
+    private HashMap<Integer, HashMap<Integer, TreeSet<Integer>>> edgepaths; // edge - paths going through that edge mapping
 
 
     public VizGraph(){
@@ -39,25 +39,9 @@ public class VizGraph {
         return nodepaths.toString();
     }
 
-    /**
-     * @deprecated
-     * */
-    public String _getNodePaths(){
-        StringBuilder nodepaths = new StringBuilder("node,paths\n");
-        for (Clusternode cnode : adjList.keySet()){
-            String temp = "";
-            temp += cnode.node + ",";
-            for (Integer path : cnode.paths){
-                temp += path + " ";
-            }
-            temp = temp.substring(0, temp.length()-1) + "\n";
-            nodepaths.append(temp);
-        }
-
-        return nodepaths.toString();
-    }
-
     public void addEdgePaths(Clusternode u, Clusternode v, int path_index){
+        if (u == null || v == null)
+            return;
         if (edgepaths == null)
             edgepaths = new HashMap<>();
         if (!edgepaths.containsKey(u.node))
@@ -68,7 +52,6 @@ public class VizGraph {
 
         edgepaths.get(u.node).get(v.node).add(path_index);
     }
-
 
     public void clearEdgeScores(){
         //@TODO probably won't clear everything out. Check back later
@@ -222,24 +205,6 @@ public class VizGraph {
     }
 
 
-    @Deprecated
-    public String[] _getDisplayGraph(){
-        String[] temp = new String[adjList.keySet().size()];
-        int i = 0;
-        for (Clusternode c : adjList.keySet()){
-            temp[i] = "";
-            temp[i] += "{\"node\":"+c.node+",\"links\":[";
-            for (Clusternode node : adjList.get(c)){
-                temp[i] += node.node + ",";
-            }
-            if (temp[i].endsWith(","))
-                temp[i] = temp[i].substring(0,temp[i].length()-1);
-            temp[i] += "]}";
-            i++;
-        }
-        return temp;
-    }
-
     /**
      * Called on scrutinize
      * */
@@ -340,5 +305,41 @@ public class VizGraph {
             }
         }
         System.out.println("---> " + i + " <---");
+    }
+
+
+    //-------- Deprecated methods ---------
+
+    /** @Deprecated */
+    public String[] _getDisplayGraph(){
+        String[] temp = new String[adjList.keySet().size()];
+        int i = 0;
+        for (Clusternode c : adjList.keySet()){
+            temp[i] = "";
+            temp[i] += "{\"node\":"+c.node+",\"links\":[";
+            for (Clusternode node : adjList.get(c)){
+                temp[i] += node.node + ",";
+            }
+            if (temp[i].endsWith(","))
+                temp[i] = temp[i].substring(0,temp[i].length()-1);
+            temp[i] += "]}";
+            i++;
+        }
+        return temp;
+    }
+    /** @deprecated */
+    public String _getNodePaths(){
+        StringBuilder nodepaths = new StringBuilder("node,paths\n");
+        for (Clusternode cnode : adjList.keySet()){
+            String temp = "";
+            temp += cnode.node + ",";
+            for (Integer path : cnode.paths){
+                temp += path + " ";
+            }
+            temp = temp.substring(0, temp.length()-1) + "\n";
+            nodepaths.append(temp);
+        }
+
+        return nodepaths.toString();
     }
 }

@@ -15,7 +15,6 @@ public class Controller {
     private static boolean multi_init = false;
     private static boolean server_debug = true;
 
-    // return initial display graph
     @GET
     @Produces(value =  MediaType.APPLICATION_JSON)
     @Path("/init-graph")
@@ -39,7 +38,6 @@ public class Controller {
                 .build();
     }
 
-    // return updated display graph
     @GET
     @Produces(value = MediaType.APPLICATION_JSON)
     @Path("/clicked")
@@ -60,23 +58,6 @@ public class Controller {
 
         return Response.ok()
                 .entity(ret)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
-                .allow("OPTIONS").build();
-    }
-
-    // return desired sub-graph
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/scrutinize")
-    public Response scrutinize(@QueryParam(value = "node") int node){
-        if (server_debug){
-            System.out.println();
-            System.out.println("--- Scrutiny Graph ---");
-            Vizualization.displaygraph.display(node);
-        }
-        return Response.ok()
-                .entity(Vizualization.displaygraph.getDisplayGraph(node))
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
                 .allow("OPTIONS").build();
@@ -137,7 +118,6 @@ public class Controller {
                 .allow("OPTIONS").build();
     }
 
-    // @TODO - support get hierarchies query during graph initialization
     @GET
     @Path("/gethierarchies")
     public Response gethierarchies(){
@@ -153,6 +133,23 @@ public class Controller {
 
         return Response.ok()
                 .entity(hierarchies)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+                .allow("OPTIONS").build();
+    }
+
+    /** Currently Unused */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/scrutinize")
+    public Response scrutinize(@QueryParam(value = "node") int node){
+        if (server_debug){
+            System.out.println();
+            System.out.println("--- Scrutiny Graph ---");
+            Vizualization.displaygraph.display(node);
+        }
+        return Response.ok()
+                .entity(Vizualization.displaygraph.getDisplayGraph(node))
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
                 .allow("OPTIONS").build();

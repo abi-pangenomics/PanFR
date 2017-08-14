@@ -7,8 +7,8 @@ import java.util.TreeSet;
  */
 public class DisjointSet {
 
-    private int[] id;
-    private int[] size;
+    private int[] id;       // holds all the set id numbers
+    private int[] size;     // ith element holds the size of set i
 
     public DisjointSet(int N){
         id = new int[N];
@@ -35,11 +35,6 @@ public class DisjointSet {
         return i;
     }
 
-
-    public boolean isconnected(int i, int j){
-        return find(i) == find(j);
-    }
-
     private int size(int i){
         return size[i];
     }
@@ -64,12 +59,13 @@ public class DisjointSet {
 
     public HashMap<Integer, TreeSet<Clusternode>> getClusters() {
 
-        // compress all paths
+        // compress all paths - O(n + n*alpha(n))
         for (int i = 0; i < id.length; i++)
             find(i);
 
         HashMap<Integer, TreeSet<Clusternode>> hierarchies = new HashMap<>();
 
+        // O(nlog n) worst case - same hierarchy
         for (int i = 0; i < id.length; i++) {
             if (!hierarchies.containsKey(id[i]))
                 hierarchies.put(id[i], new TreeSet<>());
@@ -78,5 +74,9 @@ public class DisjointSet {
         }
 
         return hierarchies;
+    }
+
+    public boolean isconnected(int i, int j){
+        return find(i) == find(j);
     }
 }
