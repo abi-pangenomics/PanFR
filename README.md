@@ -5,10 +5,10 @@
 
 ## Running the server  
    Compilation:  
-        javac ./server/src/main/*.java
+   `javac ./server/src/main/*.java`
    
    Running:  
-        java ./server/src/main/Server.java <frs file> <frpaths file>
+   `java ./server/src/main/Server.java <frs file> <frpaths file>`
   
    Dependancies:  
     org.glassfish.jersey.containers:jersey-container-jetty-http:2.26-b032  
