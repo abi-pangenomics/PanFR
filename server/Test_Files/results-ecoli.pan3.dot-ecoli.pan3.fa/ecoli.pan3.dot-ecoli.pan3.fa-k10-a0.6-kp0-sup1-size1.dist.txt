@@ -1,0 +1,5 @@
+FR,size,support,avg length
+fr-0,1,6,12
+fr-1,12,3,794
+fr-2,2,3,11
+fr-3,2,3,213
