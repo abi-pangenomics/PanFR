@@ -1,4 +1,5 @@
 # PanFR
+Check out the wiki and the poster for details on tool implementation, use, and efficiency
 
 ## Running the client:  
     run ./app/client/index.html in your web browser
