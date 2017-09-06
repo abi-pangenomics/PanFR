@@ -7,7 +7,7 @@ Check out the wiki and the poster for details on tool implementation, use, and e
 ## Running the serverlet  
     java -jar ./app/serverlet/serverlet.jar <frs file> <frpaths file>
     
-    [note - current version runs the server on localhost:9997]
+    [note - current version runs the server on localhost:9997, test data is in ./data]
 
 ## Serverlet Dependencies  
      org.glassfish.jersey.containers:jersey-container-jetty-http:2.26-b032  
